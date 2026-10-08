@@ -132,5 +132,40 @@ Proyek ini didistribusikan di bawah lisensi **MIT License**. Bebas digunakan, di
 3. Beri nama berkas: `README.md`.
 4. Tempelkan seluruh teks Markdown di atas ke dalam editor.
 5. Klik tombol **Commit changes...** di pojok kanan atas.
+---
 
-Dokumen ini akan langsung tampil secara otomatis pada halaman depan repositori GitHub Anda dengan tampilan yang rapi, profesional, dan mudah dipahami.
+## 📜 Lisensi & Atribusi Khusus Guru Indonesia
+
+Proyek ini dirilis di bawah lisensi **MIT License** dan dipersembahkan secara **GRATIS** untuk **seluruh Guru dan Tenaga Kependidikan di seluruh Indonesia**. 
+
+Anda bebas menggunakan, menggandakan, memodifikasi, dan menerapkan sistem e-Rapot ini di sekolah Anda masing-masing tanpa dipungut biaya.
+
+### Atribusi Pengembang
+Aplikasi ini dikembangkan dan didesain oleh **Catur Pamungkas (Kang Toer)**. Jika Anda menggunakan atau mengembangkan ulang proyek ini, sangat dihargai untuk tetap mencantumkan kredit pengembang asli.
+
+---
+
+## 🌐 Kunjungi Situs Web & Media Sosial
+
+Yuk, terhubung dan dukung terus pengembangan karya-karya teknologi pendidikan lainnya! Kunjungi situs web resmi dan ikuti media sosial saya melalui tautan di bawah ini:
+
+### 🏠 Situs Web Resmi
+👉 **[toer.my.id](https://toer.my.id)**
+
+### 📱 Ikuti Media Sosial
+Silakan klik ikon atau tautan di bawah ini untuk terhubung secara langsung:
+
+| Media Sosial | Tautan Resmi |
+| :--- | :--- |
+| <img src="https://cdn.simpleicons.org/facebook/1877F2" width="20" height="20" alt="Facebook"> **Facebook** | [pamungkas.toer](https://facebook.com/pamungkas.toer) |
+| <img src="https://cdn.simpleicons.org/x/000000" width="20" height="20" alt="X"> **X (Twitter)** | [@kangtoer](https://x.com/@kangtoer) |
+| <img src="https://cdn.simpleicons.org/instagram/E4405F" width="20" height="20" alt="Instagram"> **Instagram** | [@kangtoer](https://instagram.com/kangtoer) |
+| <img src="https://cdn.simpleicons.org/youtube/FF0000" width="20" height="20" alt="YouTube"> **YouTube** | [@KangToer](https://www.youtube.com/@KangToer) |
+| <img src="https://cdn.simpleicons.org/threads/000000" width="20" height="20" alt="Threads"> **Threads** | [@kangtoer](https://threads.net/@kangtoer) |
+| <img src="https://cdn.simpleicons.org/whatsapp/25D366" width="20" height="20" alt="WhatsApp"> **Saluran WhatsApp** | [Join Channel WhatsApp](https://whatsapp.com/channel/0029Vb6R2Ny2v1J1dll5Mq27) |
+
+---
+<p align="center">
+  Didedikasikan untuk kemajuan Digitalisasi Pendidikan Indonesia 🇮🇩<br>
+  <b>Dibuat oleh <a href="https://toer.my.id">Kang Toer</a> untuk Guru Indonesia</b>
+</p>
