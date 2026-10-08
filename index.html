@@ -10,18 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- PapaParse CDN untuk parsing CSV yang andal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.min.js"></script>
     
     <style>
         body {
@@ -41,7 +31,6 @@
             border-color: #3b82f6;
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         }
-        
         @media print {
             body { background: #ffffff !important; color: #000000 !important; }
             .no-print { display: none !important; }
@@ -92,7 +81,7 @@
         <!-- Loading Spinner -->
         <div id="loadingSpinner" class="hidden text-center py-12 no-print">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-            <p class="mt-4 text-slate-300 font-medium">Membaca data dari Google Spreadsheet Published...</p>
+            <p class="mt-4 text-slate-300 font-medium">Membaca data dari Google Spreadsheet...</p>
         </div>
 
         <!-- Area Hasil Nilai -->
@@ -104,8 +93,7 @@
                     </span>
                     <h2 id="resNama" class="text-2xl sm:text-3xl font-bold text-white">-</h2>
                     <p class="text-slate-400 text-sm mt-1">
-                        NIS: <span id="resNis" class="font-semibold text-slate-200">-</span> | 
-                        Kelas: <span id="resKelas" class="font-semibold text-slate-200">-</span>
+                        NIS: <span id="resNis" class="font-semibold text-slate-200">-</span>
                     </p>
                 </div>
                 <button onclick="window.print()" class="no-print bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition flex items-center gap-2">
@@ -148,114 +136,117 @@
     </main>
 
     <script>
-    // ID Document dari Tautan Published Anda
-    const SPREADSHEET_ID = "2PACX-1vS1hdumZbRrJpTE4tlFd6n5MWph6rzb8ByCg6h5CZLWuxTG0wctY-HkayFbU4Sp4i3_ZHdrdtdbwQsH";
-    
-    // URL Endpoint Google Visualization API (JSON Output)
-    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+        // URL Publikasi dari Google Spreadsheet Anda
+        const PUBLISHED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1hdumZbRrJpTE4tlFd6n5MWph6rzb8ByCg6h5CZLWuxTG0wctY-HkayFbU4Sp4i3_ZHdrdtdbwQsH/pub?output=csv";
 
-    async function cariNilaiSiswa(e) {
-        e.preventDefault();
-        const inputNis = document.getElementById("nisInput").value.trim().replace(/\D/g, ""); // Ambil angka saja
-        
-        if (!inputNis) {
-            tampilkanAlert("Masukkan nomor NIS yang valid!", "error");
-            return;
-        }
+        async function cariNilaiSiswa(e) {
+            e.preventDefault();
+            const inputNis = document.getElementById("nisInput").value.trim().replace(/\D/g, ""); // Ambil angka NIS saja
 
-        tampilkanLoading(true);
-        sembunyikanAlert();
-        document.getElementById("areaHasil").classList.add("hidden");
-
-        try {
-            // Ambil data publik dari Google Spreadsheet
-            const response = await fetch(GVIZ_URL);
-            const rawText = await response.text();
-
-            // Parsing response Google Visualization JSON
-            const jsonString = rawText.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
-            
-            if (!jsonString || !jsonString[1]) {
-                throw new Error("Format response Google Sheets tidak valid.");
-            }
-
-            const dataObj = JSON.parse(jsonString[1]);
-            const table = dataObj.table;
-
-            if (!table || !table.rows || table.rows.length === 0) {
-                tampilkanAlert("Data spreadsheet kosong atau tidak dapat diakses.", "error");
-                tampilkanLoading(false);
+            if (!inputNis) {
+                tampilkanAlert("Masukkan NIS yang valid!", "error");
                 return;
             }
 
-            // Detect Index Kolom dari Header/Cols
-            let nisColIndex = -1;
-            let namaColIndex = -1;
-            const headers = [];
+            tampilkanLoading(true);
+            sembunyikanAlert();
+            document.getElementById("areaHasil").classList.add("hidden");
 
-            table.cols.forEach((col, idx) => {
-                const label = col.label ? col.label.toUpperCase().trim() : "";
-                headers.push(col.label || `Kolom ${idx + 1}`);
-                
-                if (label.includes("NIS")) nisColIndex = idx;
-                if (label.includes("NAMA")) namaColIndex = idx;
-            });
+            try {
+                // Fetch data CSV dari URL Published
+                const response = await fetch(PUBLISHED_CSV_URL);
+                if (!response.ok) {
+                    throw new Error("Gagal mengunduh data CSV dari Google Sheets.");
+                }
 
-            // Jika header tidak terdeteksi di metadata cols, cek baris pertama (row 0)
-            if (nisColIndex === -1 && table.rows.length > 0) {
-                nisColIndex = 2; // Default Kolom C (Index 2)
-                namaColIndex = 1; // Default Kolom B (Index 1)
+                const csvText = await response.text();
+
+                // Parsing CSV menggunakan PapaParse
+                Papa.parse(csvText, {
+                    header: false,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        prosesDataSpreadsheet(results.data, inputNis);
+                    },
+                    error: function(err) {
+                        console.error("PapaParse Error:", err);
+                        tampilkanLoading(false);
+                        tampilkanAlert("Terjadi kesalahan saat membaca struktur data CSV.", "error");
+                    }
+                });
+
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                tampilkanLoading(false);
+                tampilkanAlert("Gagal terhubung ke Google Spreadsheet. Pastikan koneksi internet stabil.", "error");
+            }
+        }
+
+        function prosesDataSpreadsheet(rows, inputNis) {
+            if (!rows || rows.length < 2) {
+                tampilkanLoading(false);
+                tampilkanAlert("Data spreadsheet kosong atau format tidak sesuai.", "error");
+                return;
             }
 
-            let dataSiswa = null;
+            // Temukan baris header
+            const headerRow = rows[0];
+            let nisIndex = -1;
+            let namaIndex = -1;
 
-            // Pencarian NIS pada Baris Data
-            for (let i = 0; i < table.rows.length; i++) {
-                const row = table.rows[i].c;
-                if (!row) continue;
+            headerRow.forEach((colName, idx) => {
+                const nameUpper = String(colName).toUpperCase().trim();
+                if (nameUpper.includes("NIS")) nisIndex = idx;
+                if (nameUpper.includes("NAMA")) namaIndex = idx;
+            });
 
-                // Ambil nilai NIS dari sel
-                const cellNisRaw = row[nisColIndex] ? (row[nisColIndex].v || row[nisColIndex].f || "") : "";
-                const cellNisClean = String(cellNisRaw).trim().replace(/\D/g, "");
+            // Default jika header tidak terdeteksi secara otomatis
+            if (nisIndex === -1) nisIndex = 2; // Kolom C
+            if (namaIndex === -1) namaIndex = 1; // Kolom B
 
-                if (cellNisClean === inputNis) {
-                    const namaSiswa = row[namaColIndex] ? (row[namaColIndex].v || row[namaColIndex].f || "-") : "-";
+            let dataDitemukan = null;
+
+            // Cari NIS pada baris data
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const rawNis = row[nisIndex] ? String(row[nisIndex]).trim().replace(/\D/g, "") : "";
+
+                if (rawNis === inputNis) {
+                    const nama = row[namaIndex] ? String(row[namaIndex]).trim() : "-";
                     const mapelObj = {};
                     let totalNilai = 0;
                     let jumlahMapel = 0;
 
-                    // Iterasi Mata Pelajaran (Dimulai setelah kolom identitas/NIS)
-                    const startMapelIndex = Math.max(nisColIndex, namaColIndex) + 1;
-                    
-                    for (let j = startMapelIndex; j < row.length; j++) {
-                        const mapelName = headers[j] || `Mapel ${j}`;
-                        const cellVal = row[j] ? row[j].v : null;
+                    // Ambil nilai mata pelajaran (kolom setelah NIS/Nama)
+                    const startIndex = Math.max(nisIndex, namaIndex) + 1;
+                    for (let j = startIndex; j < headerRow.length; j++) {
+                        const mapelName = headerRow[j] ? String(headerRow[j]).trim() : `Mapel ${j}`;
+                        const valRaw = row[j];
 
-                        if (cellVal !== null && cellVal !== undefined && cellVal !== "") {
-                            const valNum = parseFloat(cellVal);
+                        if (valRaw !== undefined && valRaw !== null && valRaw !== "") {
+                            const valNum = parseFloat(String(valRaw).replace(",", "."));
                             if (!isNaN(valNum)) {
                                 mapelObj[mapelName] = valNum;
                                 totalNilai += valNum;
                                 jumlahMapel++;
                             } else {
-                                mapelObj[mapelName] = cellVal;
+                                mapelObj[mapelName] = valRaw;
                             }
                         }
                     }
 
-                    const rataRata = jumlahMapel > 0 ? (totalNilai / jumlahMapel).toFixed(2) : "0";
-                    let statusKat = "Sangat Baik";
-                    if (rataRata < 70) statusKat = "Perlu Peningkatan";
-                    else if (rataRata < 80) statusKat = "Cukup Baik";
+                    const avg = jumlahMapel > 0 ? (totalNilai / jumlahMapel).toFixed(2) : "0";
+                    let status = "Sangat Baik";
+                    if (avg < 70) status = "Perlu Peningkatan";
+                    else if (avg < 80) status = "Cukup Baik";
 
-                    dataSiswa = {
-                        nis: cellNisClean,
-                        nama: namaSiswa,
-                        kelas: "9", // Default/Dinamis
+                    dataDitemukan = {
+                        nis: rawNis,
+                        nama: nama,
                         nilai: mapelObj,
                         total: totalNilai,
-                        avg: rataRata,
-                        status: statusKat
+                        avg: avg,
+                        status: status
                     };
                     break;
                 }
@@ -263,68 +254,60 @@
 
             tampilkanLoading(false);
 
-            if (dataSiswa) {
-                renderDataSiswa(dataSiswa);
+            if (dataDitemukan) {
+                renderDataSiswa(dataDitemukan);
             } else {
                 tampilkanAlert(`NIS ${inputNis} tidak ditemukan dalam sistem!`, "error");
             }
-
-        } catch (err) {
-            console.error("Error Fetch Data:", err);
-            tampilkanLoading(false);
-            tampilkanAlert("Gagal terhubung ke Google Spreadsheet. Pastikan dokumen telah dipublikasikan ke web.", "error");
-        }
-    }
-
-    // Function Render ke Tampilan UI
-    function renderDataSiswa(data) {
-        document.getElementById("resNama").innerText = data.nama;
-        document.getElementById("resNis").innerText = data.nis;
-        document.getElementById("resKelas").innerText = data.kelas;
-        document.getElementById("resRataRata").innerText = data.avg;
-        document.getElementById("resTotal").innerText = data.total;
-        document.getElementById("resStatus").innerText = data.status;
-
-        const tbody = document.getElementById("tabelNilaiBody");
-        tbody.innerHTML = "";
-
-        for (const [mapel, nilai] of Object.entries(data.nilai)) {
-            const isAngka = typeof nilai === "number";
-            const persen = isAngka ? Math.min(100, Math.max(0, nilai)) : 0;
-            let colorClass = persen >= 85 ? "bg-emerald-500" : (persen < 70 ? "bg-amber-500" : "bg-blue-500");
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td class="py-3 px-4 font-medium text-slate-200">${mapel}</td>
-                <td class="py-3 px-4 text-center font-bold text-white">${nilai}</td>
-                <td class="py-3 px-4 hidden sm:table-cell">
-                    <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                        <div class="${colorClass} h-2.5 rounded-full" style="width: ${persen}%"></div>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
         }
 
-        document.getElementById("areaHasil").classList.remove("hidden");
-    }
+        function renderDataSiswa(data) {
+            document.getElementById("resNama").innerText = data.nama;
+            document.getElementById("resNis").innerText = data.nis;
+            document.getElementById("resRataRata").innerText = data.avg;
+            document.getElementById("resTotal").innerText = data.total;
+            document.getElementById("resStatus").innerText = data.status;
 
-    function tampilkanLoading(show) {
-        document.getElementById("loadingSpinner").classList.toggle("hidden", !show);
-    }
+            const tbody = document.getElementById("tabelNilaiBody");
+            tbody.innerHTML = "";
 
-    function tampilkanAlert(msg, type) {
-        const alertEl = document.getElementById("pesanAlert");
-        alertEl.className = `p-4 rounded-xl text-sm font-medium flex items-center gap-3 ${
-            type === 'error' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-        }`;
-        alertEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${msg}</span>`;
-        alertEl.classList.remove("hidden");
-    }
+            for (const [mapel, nilai] of Object.entries(data.nilai)) {
+                const isAngka = typeof nilai === "number";
+                const persen = isAngka ? Math.min(100, Math.max(0, nilai)) : 0;
+                let colorClass = persen >= 85 ? "bg-emerald-500" : (persen < 70 ? "bg-amber-500" : "bg-blue-500");
 
-    function sembunyikanAlert() {
-        document.getElementById("pesanAlert").classList.add("hidden");
-    }
-</script>
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-medium text-slate-200">${mapel}</td>
+                    <td class="py-3 px-4 text-center font-bold text-white">${nilai}</td>
+                    <td class="py-3 px-4 hidden sm:table-cell">
+                        <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                            <div class="${colorClass} h-2.5 rounded-full" style="width: ${persen}%"></div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            document.getElementById("areaHasil").classList.remove("hidden");
+        }
+
+        function tampilkanLoading(show) {
+            document.getElementById("loadingSpinner").classList.toggle("hidden", !show);
+        }
+
+        function tampilkanAlert(msg, type) {
+            const alertEl = document.getElementById("pesanAlert");
+            alertEl.className = `p-4 rounded-xl text-sm font-medium flex items-center gap-3 ${
+                type === 'error' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+            }`;
+            alertEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${msg}</span>`;
+            alertEl.classList.remove("hidden");
+        }
+
+        function sembunyikanAlert() {
+            document.getElementById("pesanAlert").classList.add("hidden");
+        }
+    </script>
 </body>
 </html>
