@@ -136,12 +136,15 @@
     </main>
 
     <script>
-        // URL Publikasi dari Google Spreadsheet Anda
-        const PUBLISHED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1hdumZbRrJpTE4tlFd6n5MWph6rzb8ByCg6h5CZLWuxTG0wctY-HkayFbU4Sp4i3_ZHdrdtdbwQsH/pub?output=csv";
+        // URL CSV publik Google Sheet Anda
+        const RAW_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1hdumZbRrJpTE4tlFd6n5MWph6rzb8ByCg6h5CZLWuxTG0wctY-HkayFbU4Sp4i3_ZHdrdtdbwQsH/pub?output=csv";
+        
+        // Proxy gratis untuk menghindari kendala CORS
+        const PROXY_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(RAW_CSV_URL)}`;
 
         async function cariNilaiSiswa(e) {
             e.preventDefault();
-            const inputNis = document.getElementById("nisInput").value.trim().replace(/\D/g, ""); // Ambil angka NIS saja
+            const inputNis = document.getElementById("nisInput").value.trim().replace(/\D/g, "");
 
             if (!inputNis) {
                 tampilkanAlert("Masukkan NIS yang valid!", "error");
@@ -153,15 +156,15 @@
             document.getElementById("areaHasil").classList.add("hidden");
 
             try {
-                // Fetch data CSV dari URL Published
-                const response = await fetch(PUBLISHED_CSV_URL);
+                // Mengambil data CSV menggunakan Proxy AllOrigins
+                const response = await fetch(PROXY_URL);
                 if (!response.ok) {
-                    throw new Error("Gagal mengunduh data CSV dari Google Sheets.");
+                    throw new Error("Gagal mengunduh data CSV.");
                 }
 
                 const csvText = await response.text();
 
-                // Parsing CSV menggunakan PapaParse
+                // Parsing CSV
                 Papa.parse(csvText, {
                     header: false,
                     skipEmptyLines: true,
@@ -171,25 +174,24 @@
                     error: function(err) {
                         console.error("PapaParse Error:", err);
                         tampilkanLoading(false);
-                        tampilkanAlert("Terjadi kesalahan saat membaca struktur data CSV.", "error");
+                        tampilkanAlert("Gagal memproses struktur CSV.", "error");
                     }
                 });
 
             } catch (err) {
                 console.error("Fetch Error:", err);
                 tampilkanLoading(false);
-                tampilkanAlert("Gagal terhubung ke Google Spreadsheet. Pastikan koneksi internet stabil.", "error");
+                tampilkanAlert("Gagal terhubung ke Google Spreadsheet. Pastikan koneksi internet aktif.", "error");
             }
         }
 
         function prosesDataSpreadsheet(rows, inputNis) {
             if (!rows || rows.length < 2) {
                 tampilkanLoading(false);
-                tampilkanAlert("Data spreadsheet kosong atau format tidak sesuai.", "error");
+                tampilkanAlert("Spreadsheet kosong atau format tidak sesuai.", "error");
                 return;
             }
 
-            // Temukan baris header
             const headerRow = rows[0];
             let nisIndex = -1;
             let namaIndex = -1;
@@ -200,13 +202,11 @@
                 if (nameUpper.includes("NAMA")) namaIndex = idx;
             });
 
-            // Default jika header tidak terdeteksi secara otomatis
-            if (nisIndex === -1) nisIndex = 2; // Kolom C
-            if (namaIndex === -1) namaIndex = 1; // Kolom B
+            if (nisIndex === -1) nisIndex = 2; // Default Kolom C
+            if (namaIndex === -1) namaIndex = 1; // Default Kolom B
 
             let dataDitemukan = null;
 
-            // Cari NIS pada baris data
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
                 const rawNis = row[nisIndex] ? String(row[nisIndex]).trim().replace(/\D/g, "") : "";
@@ -217,7 +217,6 @@
                     let totalNilai = 0;
                     let jumlahMapel = 0;
 
-                    // Ambil nilai mata pelajaran (kolom setelah NIS/Nama)
                     const startIndex = Math.max(nisIndex, namaIndex) + 1;
                     for (let j = startIndex; j < headerRow.length; j++) {
                         const mapelName = headerRow[j] ? String(headerRow[j]).trim() : `Mapel ${j}`;
