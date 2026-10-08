@@ -3,141 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Publikasi Virtual Nilai PSTS - SMP PGRI 1 Kuwarasan</title>
+    <title>Laporan Penilaian Sumatif Tengah Semester - SMP PGRI 1 Kuwarasan</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
             min-height: 100vh;
         }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .card-clean {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
         }
-        .glass-input {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .glass-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
-        }
+
+        /* Print Layout Exact Format */
         @media print {
             body { background: #ffffff !important; color: #000000 !important; }
             .no-print { display: none !important; }
-            .glass-card { background: none !important; border: none !important; box-shadow: none !important; color: #000000 !important; }
-            .text-white, .text-slate-200, .text-slate-300 { color: #000000 !important; }
+            .print-container { 
+                box-shadow: none !important; 
+                border: none !important; 
+                padding: 0 !important; 
+                width: 100% !important;
+            }
+            table { border-collapse: collapse !important; width: 100% !important; }
+            th, td { border: 1px solid #000000 !important; padding: 6px 8px !important; }
         }
     </style>
 </head>
-<body class="font-sans text-slate-100 antialiased pb-12">
+<body class="text-slate-800 antialiased pb-16">
 
-    <!-- Header -->
-    <header class="no-print pt-8 pb-6 px-4 text-center">
-        <div class="max-w-4xl mx-auto flex flex-col items-center justify-center space-y-3">
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-2">
-                <i class="fa-solid fa-graduation-cap text-3xl text-white"></i>
+    <!-- Header App (Di Sembunyikan Saat Cetak) -->
+    <header class="no-print bg-white border-b border-slate-200 py-5 mb-8 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-slate-900">SMP PGRI 1 KUWARASAN</h1>
+                    <p class="text-xs text-slate-500">Portal Publikasi Laporan Hasil Belajar</p>
+                </div>
             </div>
-            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
-                SMP PGRI 1 KUWARASAN
-            </h1>
-            <p class="text-sm sm:text-base text-blue-200 font-medium max-w-xl">
-                Publikasi Virtual Hasil Murni Nilai PSTS Ganjil 2026/2027
-            </p>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 space-y-6">
 
         <!-- Form Pencarian NIS -->
-        <section class="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl no-print">
-            <form id="formCari" onsubmit="cariNilaiSiswa(event)" class="space-y-4">
-                <label for="nisInput" class="block text-sm font-semibold text-slate-300 text-center sm:text-left">
-                    <i class="fa-solid fa-id-card text-blue-500 mr-2"></i>Masukkan Nomor Induk Siswa (NIS)
-                </label>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="nisInput" required placeholder="Contoh: 9911" 
-                        class="glass-input w-full px-5 py-3.5 rounded-xl text-white placeholder-slate-400 focus:outline-none transition text-lg font-medium">
-                    <button type="submit" id="btnCari" 
-                        class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <span>Cek Nilai</span>
-                    </button>
+        <section class="card-clean rounded-2xl p-6 sm:p-8 no-print">
+            <div class="max-w-md mx-auto text-center mb-6">
+                <h2 class="text-lg font-bold text-slate-900">Pencarian Laporan Hasil Belajar</h2>
+                <p class="text-xs text-slate-500 mt-1">Masukkan Nomor Induk Siswa (NIS) untuk melihat rapot PSTS.</p>
+            </div>
+
+            <form onsubmit="cariNilaiSiswa(event)" class="max-w-md mx-auto space-y-4">
+                <div>
+                    <label for="nisInput" class="block text-xs font-bold text-slate-700 uppercase mb-2 text-left">
+                        Nomor Induk Siswa (NIS)
+                    </label>
+                    <input type="text" id="nisInput" required placeholder="Masukkan NIS Anda" 
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div id="pesanAlert" class="hidden p-4 rounded-xl text-sm font-medium flex items-center gap-3"></div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl text-sm transition shadow-md">
+                    <i class="fa-solid fa-magnifying-glass mr-1"></i> Tampilkan Rapot
+                </button>
+
+                <div id="pesanAlert" class="hidden p-4 rounded-xl text-xs font-medium"></div>
             </form>
         </section>
 
         <!-- Loading Spinner -->
         <div id="loadingSpinner" class="hidden text-center py-12 no-print">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-            <p class="mt-4 text-slate-300 font-medium">Menghubungi server Apps Script...</p>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+            <p class="mt-2 text-slate-600 text-xs font-medium">Mengambil data rapot...</p>
         </div>
 
-        <!-- Area Hasil Nilai -->
-        <section id="areaHasil" class="hidden glass-card rounded-2xl p-6 sm:p-8 shadow-2xl">
-            <div class="border-b border-slate-700/60 pb-6 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-300 text-xs font-semibold rounded-full mb-2">
-                        Kartu Hasil Studi (KHS)
-                    </span>
-                    <h2 id="resNama" class="text-2xl sm:text-3xl font-bold text-white">-</h2>
-                    <p class="text-slate-400 text-sm mt-1">
-                        NIS: <span id="resNis" class="font-semibold text-slate-200 mr-4">-</span>
-                        Kelas: <span id="resKelas" class="font-semibold text-slate-200 mr-4">-</span>
-                        Wali Kelas: <span id="resWalas" class="font-semibold text-slate-200">-</span>
-                    </p>
-                </div>
-                <button onclick="window.print()" class="no-print bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition flex items-center gap-2">
-                    <i class="fa-solid fa-print text-blue-400"></i>
-                    <span>Cetak / PDF</span>
+        <!-- Area Hasil Rapot (Sesuai Format PDF) -->
+        <section id="areaHasil" class="hidden card-clean rounded-2xl p-6 sm:p-10 print-container">
+            
+            <!-- Tombol Cetak -->
+            <div class="no-print flex justify-end mb-6">
+                <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Cetak Rapot / PDF</span>
                 </button>
             </div>
 
-            <!-- Ringkasan Statistik -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                    <p class="text-xs text-slate-400 font-medium">Rata-Rata Nilai</p>
-                    <p id="resRataRata" class="text-2xl sm:text-3xl font-extrabold text-blue-400 mt-1">0</p>
+            <!-- KOP SEKOLAH -->
+            <div class="text-center border-b-2 border-black pb-3 mb-4">
+                <p class="text-xs font-bold uppercase tracking-wide">YPLP DASAR MENENGAH</p>
+                <p class="text-xs font-bold uppercase tracking-wide">YAYASAN PEMBINA LEMBAGA PENDIDIKAN DASAR DAN MENENGAH</p>
+                <p class="text-xs font-bold uppercase tracking-wide">PERSATUAN GURU REPUBLIK INDONESIA JAWA TENGAH</p>
+                <h2 class="text-xl sm:text-2xl font-extrabold uppercase tracking-wider my-1">SMP PGRI 1 KUWARASAN</h2>
+                <p class="text-xs font-semibold">TERAKREDITASI: B</p>
+                <p class="text-[11px] text-slate-600 mt-1">
+                    Jalan Panembahan, RT I, RW II, Desa Kuwarasan, Kecamatan Kuwarasan, Kebumen 54366<br>
+                    Telp. (0287) 472210 | Laman: www.spegsakujuara.blogspot.com | Pos-el: kuwarasansmppgri@gmail.com
+                </p>
+            </div>
+
+            <div class="text-center mb-6">
+                <h3 class="text-sm font-bold uppercase tracking-wider underline">LAPORAN PENILAIAN SUMATIF TENGAH SEMESTER 1</h3>
+                <p class="text-xs font-semibold mt-0.5">TAHUN AJARAN 2026/2027</p>
+            </div>
+
+            <!-- DATA SISWA -->
+            <div class="grid grid-cols-2 gap-x-8 text-xs sm:text-sm font-medium mb-4">
+                <table class="w-full">
+                    <tr><td class="py-1 w-24 font-semibold">Nama</td><td class="w-4">:</td><td id="resNama" class="font-bold">-</td></tr>
+                    <tr><td class="py-1 font-semibold">Kelas</td><td>:</td><td id="resKelas" class="font-bold">-</td></tr>
+                </table>
+                <table class="w-full">
+                    <tr><td class="py-1 w-24 font-semibold">Sekolah</td><td class="w-4">:</td><td>SMP PGRI 1 Kuwarasan</td></tr>
+                    <tr><td class="py-1 font-semibold">Semester</td><td>:</td><td>Ganjil</td></tr>
+                </table>
+            </div>
+
+            <!-- TABEL NILAI -->
+            <div class="overflow-x-auto mb-4">
+                <table class="w-full text-left text-xs sm:text-sm border-collapse border border-slate-300">
+                    <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
+                        <tr>
+                            <th class="py-2.5 px-3 border border-slate-300 text-center w-12">No</th>
+                            <th class="py-2.5 px-3 border border-slate-300">Mata Pelajaran</th>
+                            <th class="py-2.5 px-3 border border-slate-300 text-center w-20">Angka</th>
+                            <th class="py-2.5 px-3 border border-slate-300">Huruf</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelNilaiBody"></tbody>
+                </table>
+            </div>
+
+            <p class="text-[11px] italic text-slate-600 mb-6">
+                *Bagi murid yang nilainya masih di bawah KKTP (70), hasil ini dapat dijadikan sebagai bahan evaluasi dan koreksi diri agar ke depannya dapat memperoleh hasil yang lebih baik.
+            </p>
+
+            <!-- SEKSI ANALISIS & REKOMENDASI (FITUR BARU) -->
+            <div class="border border-slate-300 rounded-xl p-4 bg-slate-50/50 mb-8 space-y-3 text-xs sm:text-sm">
+                <h4 class="font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-blue-600 no-print"></i>
+                    <span>CATATAN EVALUASI & DESKRIPSI KINERJA BELAJAR</span>
+                </h4>
+                
+                <div>
+                    <p class="font-bold text-slate-800">1. Kelebihan Peserta Didik:</p>
+                    <p id="resKelebihan" class="text-slate-700 mt-0.5 pl-4">-</p>
                 </div>
-                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                    <p class="text-xs text-slate-400 font-medium">Total Nilai</p>
-                    <p id="resTotal" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1">0</p>
+
+                <div>
+                    <p class="font-bold text-slate-800">2. Evaluasi & Area Pengembangan:</p>
+                    <p id="resKekurangan" class="text-slate-700 mt-0.5 pl-4">-</p>
                 </div>
-                <div class="col-span-2 sm:col-span-1 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                    <p class="text-xs text-slate-400 font-medium">Status Kategori</p>
-                    <p id="resStatus" class="text-lg sm:text-xl font-bold text-amber-400 mt-1.5">-</p>
+
+                <div>
+                    <p class="font-bold text-slate-800">3. Hal yang Harus Dilakukan Peserta Didik:</p>
+                    <p id="resTindakan" class="text-slate-700 mt-0.5 pl-4">-</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-slate-800">4. Saran Terbaik untuk Orang Tua & Guru:</p>
+                    <p id="resSaranOrtu" class="text-slate-700 mt-0.5 pl-4">-</p>
                 </div>
             </div>
 
-            <!-- Tabel Nilai -->
-            <div class="overflow-x-auto rounded-xl border border-slate-700/60">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="bg-slate-800/80 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-700">
-                        <tr>
-                            <th class="py-3.5 px-4">Mata Pelajaran</th>
-                            <th class="py-3.5 px-4 text-center">Nilai Murni</th>
-                            <th class="py-3.5 px-4 hidden sm:table-cell">Visualisasi Kinerja</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelNilaiBody" class="divide-y divide-slate-700/50 bg-slate-900/30"></tbody>
-                </table>
+            <!-- TANDA TANGAN -->
+            <div class="flex justify-between items-end text-xs sm:text-sm pt-4">
+                <div class="text-center w-48">
+                    <p class="mb-16">Orang Tua / Wali Murid</p>
+                    <p class="border-b border-slate-800 font-bold"></p>
+                </div>
+                <div class="text-center w-56">
+                    <p>Kuwarasan, 9 Oktober 2026</p>
+                    <p class="mb-16">Wali Kelas <span id="resKelasTt"></span></p>
+                    <p id="resWalas" class="font-bold underline">-</p>
+                </div>
             </div>
+
         </section>
 
     </main>
 
     <script>
-        // TEMPATKAN URL WEB APP APPS SCRIPT ANDA DI SINI
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxP7xqeSaS-05CcVErQW4uucEL9kUxDd4JUxPTHreuv-Pja8N3XAN8xIOBOMFxA8U1t/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHl7wcHH-l2Mofy6WyDhY_n0kg9szwmOXEq6Q_w4PH2fPC_uG4k0Avl6F-Gc4uEnZ6/exec";
 
         async function cariNilaiSiswa(e) {
             e.preventDefault();
@@ -153,52 +210,48 @@
             document.getElementById("areaHasil").classList.add("hidden");
 
             try {
-                // Panggil Web App Apps Script dengan parameter NIS
                 const response = await fetch(`${APPS_SCRIPT_URL}?nis=${inputNis}`);
                 const result = await response.json();
 
                 tampilkanLoading(false);
 
                 if (result.status === "success") {
-                    renderDataSiswa(result.data);
-                } else if (result.status === "not_found") {
-                    tampilkanAlert(`NIS ${inputNis} tidak ditemukan dalam sistem!`, "error");
+                    renderRapot(result.data);
                 } else {
-                    tampilkanAlert(result.message || "Terjadi kesalahan pada server.", "error");
+                    tampilkanAlert(result.message || "Data NIS tidak ditemukan.", "error");
                 }
 
             } catch (err) {
-                console.error("Fetch Error:", err);
                 tampilkanLoading(false);
-                tampilkanAlert("Gagal terhubung ke Google Apps Script backend.", "error");
+                tampilkanAlert("Gagal terhubung ke server. Periksa koneksi internet.", "error");
             }
         }
 
-        function renderDataSiswa(data) {
+        function renderRapot(data) {
             document.getElementById("resNama").innerText = data.nama;
-            document.getElementById("resNis").innerText = data.nis;
             document.getElementById("resKelas").innerText = data.kelas;
+            document.getElementById("resKelasTt").innerText = data.kelas;
             document.getElementById("resWalas").innerText = data.walas;
-            document.getElementById("resRataRata").innerText = data.avg;
-            document.getElementById("resTotal").innerText = data.total;
-            document.getElementById("resStatus").innerText = data.status;
 
+            // Render Deskripsi Analisis
+            document.getElementById("resKelebihan").innerText = data.analisis.kelebihan;
+            document.getElementById("resKekurangan").innerText = data.analisis.kekurangan;
+            document.getElementById("resTindakan").innerText = data.analisis.tindakanSiswa;
+            document.getElementById("resSaranOrtu").innerText = data.analisis.saranOrangTuaGuru;
+
+            // Render Tabel Nilai
             const tbody = document.getElementById("tabelNilaiBody");
             tbody.innerHTML = "";
 
-            for (const [mapel, nilai] of Object.entries(data.nilai)) {
-                const persen = Math.min(100, Math.max(0, nilai));
-                let colorClass = persen >= 85 ? "bg-emerald-500" : (persen < 70 ? "bg-amber-500" : "bg-blue-500");
-
+            let index = 1;
+            for (const [mapel, valObj] of Object.entries(data.nilai)) {
                 const tr = document.createElement("tr");
+                tr.className = valObj.angka < 70 ? "bg-amber-50/50" : "";
                 tr.innerHTML = `
-                    <td class="py-3 px-4 font-medium text-slate-200">${mapel}</td>
-                    <td class="py-3 px-4 text-center font-bold text-white">${nilai}</td>
-                    <td class="py-3 px-4 hidden sm:table-cell">
-                        <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                            <div class="${colorClass} h-2.5 rounded-full" style="width: ${persen}%"></div>
-                        </div>
-                    </td>
+                    <td class="py-2 px-3 border border-slate-300 text-center">${index++}</td>
+                    <td class="py-2 px-3 border border-slate-300 font-medium">${mapel}</td>
+                    <td class="py-2 px-3 border border-slate-300 text-center font-bold ${valObj.angka < 70 ? 'text-rose-600' : ''}">${valObj.angka}</td>
+                    <td class="py-2 px-3 border border-slate-300">${valObj.terbilang}</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -212,10 +265,8 @@
 
         function tampilkanAlert(msg, type) {
             const alertEl = document.getElementById("pesanAlert");
-            alertEl.className = `p-4 rounded-xl text-sm font-medium flex items-center gap-3 ${
-                type === 'error' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-            }`;
-            alertEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${msg}</span>`;
+            alertEl.className = `p-4 rounded-xl text-xs font-medium ${type === 'error' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700'}`;
+            alertEl.innerText = msg;
             alertEl.classList.remove("hidden");
         }
 
