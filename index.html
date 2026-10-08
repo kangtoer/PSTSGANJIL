@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- PapaParse CDN untuk parsing CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
         body {
@@ -81,7 +79,7 @@
         <!-- Loading Spinner -->
         <div id="loadingSpinner" class="hidden text-center py-12 no-print">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-            <p class="mt-4 text-slate-300 font-medium">Membaca data dari Google Spreadsheet...</p>
+            <p class="mt-4 text-slate-300 font-medium">Menghubungi server Apps Script...</p>
         </div>
 
         <!-- Area Hasil Nilai -->
@@ -138,29 +136,8 @@
     </main>
 
     <script>
-        // URL Publikasi CSV Spreadsheet Anda
-        const RAW_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1hdumZbRrJpTE4tlFd6n5MWph6rzb8ByCg6h5CZLWuxTG0wctY-HkayFbU4Sp4i3_ZHdrdtdbwQsH/pub?output=csv";
-
-        async function fetchCSVWithFallback() {
-            // Daftar proxy untuk menghindari masalah CORS
-            const proxies = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(RAW_CSV_URL)}`,
-                `https://corsproxy.io/?${encodeURIComponent(RAW_CSV_URL)}`
-            ];
-
-            for (const url of proxies) {
-                try {
-                    const res = await fetch(url);
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (text && text.length > 50) return text;
-                    }
-                } catch (e) {
-                    console.warn("Proxy mencoba yang lain...", url);
-                }
-            }
-            throw new Error("Gagal mengambil data dari Google Sheets melalui proxy.");
-        }
+        // TEMPATKAN URL WEB APP APPS SCRIPT ANDA DI SINI
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwk3jRawEOzDKKXKWPhZ1L0uYH7FqhNhRWTB4dANoLJH49JHVaKy2Xo3bsvBXFYops/exec";
 
         async function cariNilaiSiswa(e) {
             e.preventDefault();
@@ -176,110 +153,24 @@
             document.getElementById("areaHasil").classList.add("hidden");
 
             try {
-                const csvText = await fetchCSVWithFallback();
+                // Panggil Web App Apps Script dengan parameter NIS
+                const response = await fetch(`${APPS_SCRIPT_URL}?nis=${inputNis}`);
+                const result = await response.json();
 
-                Papa.parse(csvText, {
-                    header: false,
-                    skipEmptyLines: true,
-                    complete: function(results) {
-                        prosesDataSpreadsheet(results.data, inputNis);
-                    },
-                    error: function(err) {
-                        console.error("PapaParse Error:", err);
-                        tampilkanLoading(false);
-                        tampilkanAlert("Gagal memproses struktur CSV.", "error");
-                    }
-                });
+                tampilkanLoading(false);
+
+                if (result.status === "success") {
+                    renderDataSiswa(result.data);
+                } else if (result.status === "not_found") {
+                    tampilkanAlert(`NIS ${inputNis} tidak ditemukan dalam sistem!`, "error");
+                } else {
+                    tampilkanAlert(result.message || "Terjadi kesalahan pada server.", "error");
+                }
 
             } catch (err) {
                 console.error("Fetch Error:", err);
                 tampilkanLoading(false);
-                tampilkanAlert("Gagal terhubung ke Google Spreadsheet. Pastikan dokumen telah dipublikasikan ke web.", "error");
-            }
-        }
-
-        function prosesDataSpreadsheet(rows, inputNis) {
-            if (!rows || rows.length < 2) {
-                tampilkanLoading(false);
-                tampilkanAlert("Spreadsheet kosong atau format tidak sesuai.", "error");
-                return;
-            }
-
-            const headerRow = rows[0];
-            
-            // Mencari indeks kolom berdasarkan nama header persis di spreadsheet Anda
-            let nisIdx = -1, namaIdx = -1, kelasIdx = -1, walasIdx = -1;
-            const mapelIndices = [];
-
-            headerRow.forEach((col, idx) => {
-                const title = String(col).trim().toUpperCase();
-                if (title === "NIS") nisIdx = idx;
-                else if (title === "NAMA") namaIdx = idx;
-                else if (title === "KELAS") kelasIdx = idx;
-                else if (title === "WALAS" || title.includes("WALA")) walasIdx = idx;
-                // Mengambil hanya kolom nilai mata pelajaran (Abaikan kolom "TERBILANG")
-                else if (title !== "NO" && !title.includes("TERBILANG")) {
-                    mapelIndices.push({ index: idx, name: String(col).trim() });
-                }
-            });
-
-            // Default jika tidak terdeteksi otomatis
-            if (nisIdx === -1) nisIdx = 3;  // Kolom D
-            if (namaIdx === -1) namaIdx = 1; // Kolom B
-            if (kelasIdx === -1) kelasIdx = 2; // Kolom C
-
-            let dataDitemukan = null;
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                const rawNis = row[nisIdx] ? String(row[nisIdx]).trim().replace(/\D/g, "") : "";
-
-                if (rawNis === inputNis) {
-                    const nama = row[namaIdx] ? String(row[namaIdx]).trim() : "-";
-                    const kelas = row[kelasIdx] ? String(row[kelasIdx]).trim() : "-";
-                    const walas = (walasIdx !== -1 && row[walasIdx]) ? String(row[walasIdx]).trim() : "-";
-
-                    const mapelObj = {};
-                    let totalNilai = 0;
-                    let jumlahMapel = 0;
-
-                    mapelIndices.forEach(item => {
-                        const valRaw = row[item.index];
-                        if (valRaw !== undefined && valRaw !== null && valRaw !== "") {
-                            const valNum = parseFloat(String(valRaw).replace(",", "."));
-                            if (!isNaN(valNum)) {
-                                mapelObj[item.name] = valNum;
-                                totalNilai += valNum;
-                                jumlahMapel++;
-                            }
-                        }
-                    });
-
-                    const avg = jumlahMapel > 0 ? (totalNilai / jumlahMapel).toFixed(2) : "0";
-                    let status = "Sangat Baik";
-                    if (avg < 70) status = "Perlu Peningkatan";
-                    else if (avg < 80) status = "Cukup Baik";
-
-                    dataDitemukan = {
-                        nis: rawNis,
-                        nama: nama,
-                        kelas: kelas,
-                        walas: walas,
-                        nilai: mapelObj,
-                        total: totalNilai,
-                        avg: avg,
-                        status: status
-                    };
-                    break;
-                }
-            }
-
-            tampilkanLoading(false);
-
-            if (dataDitemukan) {
-                renderDataSiswa(dataDitemukan);
-            } else {
-                tampilkanAlert(`NIS ${inputNis} tidak ditemukan dalam sistem!`, "error");
+                tampilkanAlert("Gagal terhubung ke Google Apps Script backend.", "error");
             }
         }
 
