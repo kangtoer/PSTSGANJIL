@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publikasi Virtual Nilai PSTS - SMP PGRI 1 Kuwarasan</title>
-    <!-- Tailwind CSS via CDN -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,16 +17,6 @@
                 extend: {
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a',
-                        }
                     }
                 }
             }
@@ -52,109 +42,83 @@
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         }
         
-        /* CSS khusus saat mencetak ke PDF / Printer */
         @media print {
-            body {
-                background: #ffffff !important;
-                color: #000000 !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .print-only {
-                display: block !important;
-            }
-            .glass-card {
-                background: none !important;
-                border: none !important;
-                box-shadow: none !important;
-                backdrop-filter: none !important;
-                color: #000000 !important;
-            }
-            .print-border {
-                border: 1px solid #cbd5e1 !important;
-            }
-            .text-white, .text-slate-200, .text-slate-300 {
-                color: #000000 !important;
-            }
+            body { background: #ffffff !important; color: #000000 !important; }
+            .no-print { display: none !important; }
+            .glass-card { background: none !important; border: none !important; box-shadow: none !important; color: #000000 !important; }
+            .text-white, .text-slate-200, .text-slate-300 { color: #000000 !important; }
         }
     </style>
 </head>
-<body class="font-sans text-slate-100 antialiased selection:bg-brand-500 selection:text-white pb-12">
+<body class="font-sans text-slate-100 antialiased pb-12">
 
-    <!-- Header Section -->
+    <!-- Header -->
     <header class="no-print pt-8 pb-6 px-4 text-center">
         <div class="max-w-4xl mx-auto flex flex-col items-center justify-center space-y-3">
-            <div class="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30 mb-2">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-2">
                 <i class="fa-solid fa-graduation-cap text-3xl text-white"></i>
             </div>
             <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
                 SMP PGRI 1 KUWARASAN
             </h1>
-            <p class="text-sm sm:text-base text-brand-200 font-medium max-w-xl">
+            <p class="text-sm sm:text-base text-blue-200 font-medium max-w-xl">
                 Publikasi Virtual Hasil Murni Nilai PSTS Ganjil 2026/2027
             </p>
         </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 space-y-6">
 
         <!-- Form Pencarian NIS -->
         <section class="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl no-print">
-            <form id="formCari" onsubmit="cariNilai(event)" class="space-y-4">
+            <form id="formCari" onsubmit="cariNilaiSiswa(event)" class="space-y-4">
                 <label for="nisInput" class="block text-sm font-semibold text-slate-300 text-center sm:text-left">
-                    <i class="fa-solid fa-id-card text-brand-500 mr-2"></i>Masukkan Nomor Induk Siswa (NIS)
+                    <i class="fa-solid fa-id-card text-blue-500 mr-2"></i>Masukkan Nomor Induk Siswa (NIS)
                 </label>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="relative flex-1">
-                        <input type="text" id="nisInput" required placeholder="Contoh: 9911" 
-                            class="glass-input w-full px-5 py-3.5 rounded-xl text-white placeholder-slate-400 focus:outline-none transition duration-200 text-lg font-medium tracking-wide">
-                    </div>
+                    <input type="text" id="nisInput" required placeholder="Contoh: 9911" 
+                        class="glass-input w-full px-5 py-3.5 rounded-xl text-white placeholder-slate-400 focus:outline-none transition text-lg font-medium">
                     <button type="submit" id="btnCari" 
-                        class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg shadow-brand-600/30 hover:shadow-brand-500/50 transition duration-200 flex items-center justify-center gap-2 text-base">
+                        class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <span>Cek Nilai</span>
                     </button>
                 </div>
-                <!-- Pesan Error / Informasional -->
                 <div id="pesanAlert" class="hidden p-4 rounded-xl text-sm font-medium flex items-center gap-3"></div>
             </form>
         </section>
 
         <!-- Loading Spinner -->
         <div id="loadingSpinner" class="hidden text-center py-12 no-print">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-brand-500 border-t-transparent"></div>
-            <p class="mt-4 text-slate-300 font-medium">Mengambil data nilai dari sistem...</p>
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="mt-4 text-slate-300 font-medium">Membaca data dari Google Spreadsheet Published...</p>
         </div>
 
-        <!-- Area Hasil Nilai Siswa -->
-        <section id="areaHasil" class="hidden glass-card rounded-2xl p-6 sm:p-8 shadow-2xl print-border">
-            
-            <!-- Header Kartu Nilai -->
+        <!-- Area Hasil Nilai -->
+        <section id="areaHasil" class="hidden glass-card rounded-2xl p-6 sm:p-8 shadow-2xl">
             <div class="border-b border-slate-700/60 pb-6 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <span class="inline-block px-3 py-1 bg-brand-500/20 text-brand-300 text-xs font-semibold rounded-full mb-2">
+                    <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-300 text-xs font-semibold rounded-full mb-2">
                         Kartu Hasil Studi (KHS)
                     </span>
-                    <h2 id="resNama" class="text-2xl sm:text-3xl font-bold text-white">-[Cite: 5]</h2>
+                    <h2 id="resNama" class="text-2xl sm:text-3xl font-bold text-white">-</h2>
                     <p class="text-slate-400 text-sm mt-1">
                         NIS: <span id="resNis" class="font-semibold text-slate-200">-</span> | 
                         Kelas: <span id="resKelas" class="font-semibold text-slate-200">-</span>
                     </p>
                 </div>
-                <!-- Tombol Cetak -->
-                <button onclick="window.print()" class="no-print self-start sm:self-center bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition flex items-center gap-2 shadow-md">
-                    <i class="fa-solid fa-print text-brand-400"></i>
+                <button onclick="window.print()" class="no-print bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-print text-blue-400"></i>
                     <span>Cetak / PDF</span>
                 </button>
             </div>
 
-            <!-- Card Ringkasan Performansi -->
+            <!-- Ringkasan Statistik -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
                     <p class="text-xs text-slate-400 font-medium">Rata-Rata Nilai</p>
-                    <p id="resRataRata" class="text-2xl sm:text-3xl font-extrabold text-brand-400 mt-1">0</p>
+                    <p id="resRataRata" class="text-2xl sm:text-3xl font-extrabold text-blue-400 mt-1">0</p>
                 </div>
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
                     <p class="text-xs text-slate-400 font-medium">Total Nilai</p>
@@ -166,7 +130,7 @@
                 </div>
             </div>
 
-            <!-- Tabel Nilai Mata Pelajaran -->
+            <!-- Tabel Nilai -->
             <div class="overflow-x-auto rounded-xl border border-slate-700/60">
                 <table class="w-full text-left text-sm text-slate-300">
                     <thead class="bg-slate-800/80 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-700">
@@ -176,106 +140,148 @@
                             <th class="py-3.5 px-4 hidden sm:table-cell">Visualisasi Kinerja</th>
                         </tr>
                     </thead>
-                    <tbody id="tabelNilaiBody" class="divide-y divide-slate-700/50 bg-slate-900/30">
-                        <!-- Data baris nilai di-generate dinamis lewat JavaScript -->
-                    </tbody>
+                    <tbody id="tabelNilaiBody" class="divide-y divide-slate-700/50 bg-slate-900/30"></tbody>
                 </table>
-            </div>
-            
-            <p class="text-xs text-slate-500 mt-6 text-center italic">
-                *Nilai di atas merupakan Hasil Murni Penilaian Tengah Semester (PSTS) Ganjil T.A. 2026/2027.
-            </p>
-        </section>
-
-        <!-- Papan Komentar & Kesan Pesan -->
-        <section class="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl no-print space-y-6">
-            <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-comments text-brand-500"></i>Papan Kesan & Pesan
-            </h3>
-
-            <!-- Form Kirim Pesan -->
-            <form id="formKomentar" onsubmit="kirimKomentar(event)" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="text" id="komenNama" required placeholder="Nama Anda" class="glass-input px-4 py-2.5 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none">
-                    <input type="text" id="komenNis" placeholder="NIS (Opsional)" class="glass-input px-4 py-2.5 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none">
-                </div>
-                <textarea id="komenPesan" required rows="3" placeholder="Tuliskan kesan, pesan, atau masukan Anda di sini..." class="glass-input w-full px-4 py-2.5 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none"></textarea>
-                <button type="submit" id="btnKomen" class="bg-slate-700 hover:bg-slate-600 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i>Kirim Pesan
-                </button>
-            </form>
-
-            <!-- List Pesan Terkirim -->
-            <div id="listKomentar" class="space-y-3 pt-4 border-t border-slate-700/60 max-h-60 overflow-y-auto pr-2">
-                <p class="text-xs text-slate-500 italic">Memuat komentar...</p>
             </div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="text-center text-xs text-slate-500 mt-12 no-print">
-        <p>&copy; 2026 SMP PGRI 1 Kuwarasan. All rights reserved.</p>
-        <p class="mt-1">Dipublikasikan secara Virtual & Transparent</p>
-    </footer>
-
-    <!-- Logic JavaScript -->
     <script>
-        // GANTI LINK DI BAWAH DENGAN URL WEB APP DEPLOYMENT APPS SCRIPT ANDA
-        const API_URL = "https://script.google.com/macros/s/AKfycbyvGDS1WmGkRYHfkBB1GIeai3F9KXB715MzWOldLSun61I-ItdHQ3ntv5IGcuvMwDnw/exec";
+        // URL Publikasi CSV dari Google Sheets Anda
+        const PUB_URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1hdumZbRrJpTE4tlFd6n5MWph6rzb8ByCg6h5CZLWuxTG0wctY-HkayFbU4Sp4i3_ZHdrdtdbwQsH/pub?output=csv";
 
-        let currentDataSiswa = null;
+        // Daftar Tab/Sheet GID (Dapat ditambahkan jika ada tab kelas tambahan)
+        const SHEET_GIDS = [
+            { name: "9A", gid: "0" },
+            { name: "9B", gid: "1" },
+            { name: "9C", gid: "2" },
+            { name: "8A", gid: "3" },
+            { name: "8B", gid: "4" },
+            { name: "7A", gid: "5" },
+            { name: "7B", gid: "6" }
+        ];
 
-        // Function: Cari Nilai Siswa
-        async function cariNilai(e) {
+        async function cariNilaiSiswa(e) {
             e.preventDefault();
-            const nis = document.getElementById("nisInput").value.trim();
-            if (!nis) return;
+            const inputNis = document.getElementById("nisInput").value.trim().replace(/\s+/g, "");
+            if (!inputNis) return;
 
             tampilkanLoading(true);
             sembunyikanAlert();
             document.getElementById("areaHasil").classList.add("hidden");
 
-            try {
-                const response = await fetch(`${API_URL}?action=getNilai&nis=${encodeURIComponent(nis)}`);
-                const result = await response.json();
+            let dataDitemukan = null;
 
-                if (result.success) {
-                    currentDataSiswa = result.data;
-                    tampilkanHasil(result.data);
-                } else {
-                    tampilkanAlert(result.message || "NIS tidak ditemukan dalam sistem!", "error");
+            // Iterasi pencarian ke semua tab spreadsheet yang dipublikasikan
+            for (const itemSheet of SHEET_GIDS) {
+                try {
+                    const csvUrl = `${PUB_URL_BASE}&gid=${itemSheet.gid}`;
+                    const res = await fetch(csvUrl);
+                    if (!res.ok) continue;
+
+                    const csvText = await res.text();
+                    const rows = parseCSV(csvText);
+
+                    if (rows.length < 2) continue;
+
+                    const headers = rows[0];
+
+                    // Cari baris siswa berdasarkan NIS di Kolom C (Index 2)
+                    for (let i = 1; i < rows.length; i++) {
+                        const cellNis = String(rows[i][2] || "").trim().replace(/\s+/g, "");
+                        
+                        if (cellNis === inputNis) {
+                            const mapelObj = {};
+                            let total = 0;
+                            let count = 0;
+
+                            // BACA MATA PELAJARAN (Kolom D / Index 3 ke kanan)
+                            for (let j = 3; j < headers.length; j++) {
+                                const mapelName = headers[j] ? headers[j].trim() : "";
+                                if (mapelName) {
+                                    const valRaw = rows[i][j];
+                                    const valNum = parseFloat(String(valRaw).replace(",", "."));
+                                    if (!isNaN(valNum)) {
+                                        mapelObj[mapelName] = valNum;
+                                        total += valNum;
+                                        count++;
+                                    } else {
+                                        mapelObj[mapelName] = valRaw || "-";
+                                    }
+                                }
+                            }
+
+                            const avg = count > 0 ? (total / count).toFixed(2) : 0;
+                            let status = "Sangat Baik";
+                            if (avg < 70) status = "Perlu Peningkatan";
+                            else if (avg < 80) status = "Cukup Baik";
+
+                            dataDitemukan = {
+                                nis: rows[i][2],
+                                nama: rows[i][1], // Kolom B (Index 1)
+                                kelas: itemSheet.name,
+                                nilai: mapelObj,
+                                total: total,
+                                avg: avg,
+                                status: status
+                            };
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    console.warn(`Gagal membaca GID ${itemSheet.gid}`);
                 }
-            } catch (err) {
-                tampilkanAlert("Gagal terhubung ke server. Pastikan jaringan internet Anda stabil.", "error");
-            } finally {
-                tampilkanLoading(false);
+
+                if (dataDitemukan) break;
+            }
+
+            tampilkanLoading(false);
+
+            if (dataDitemukan) {
+                renderDataSiswa(dataDitemukan);
+            } else {
+                tampilkanAlert(`NIS ${inputNis} tidak ditemukan dalam sistem!`, "error");
             }
         }
 
-        // Function: Render Data Hasil ke UI
-        function tampilkanHasil(data) {
+        // Helper fungsi Parsing CSV
+        function parseCSV(text) {
+            const lines = text.split("\n");
+            return lines.map(line => {
+                const row = [];
+                let insideQuote = false;
+                let entry = "";
+                for (let char of line) {
+                    if (char === '"') {
+                        insideQuote = !insideQuote;
+                    } else if (char === ',' && !insideQuote) {
+                        row.push(entry.trim());
+                        entry = "";
+                    } else {
+                        entry += char;
+                    }
+                }
+                row.push(entry.trim());
+                return row;
+            });
+        }
+
+        function renderDataSiswa(data) {
             document.getElementById("resNama").innerText = data.nama || "-";
             document.getElementById("resNis").innerText = data.nis || "-";
             document.getElementById("resKelas").innerText = data.kelas || "-";
+            document.getElementById("resRataRata").innerText = data.avg;
+            document.getElementById("resTotal").innerText = data.total;
+            document.getElementById("resStatus").innerText = data.status;
 
-            const ringkasan = data.ringkasan || {};
-            document.getElementById("resRataRata").innerText = ringkasan.rataRata || 0;
-            document.getElementById("resTotal").innerText = ringkasan.totalNilai || 0;
-            document.getElementById("resStatus").innerText = ringkasan.status || "-";
-
-            // Render Tabel Nilai
             const tbody = document.getElementById("tabelNilaiBody");
             tbody.innerHTML = "";
 
-            const mapelNilai = data.nilai || {};
-            for (const [mapel, nilai] of Object.entries(mapelNilai)) {
+            for (const [mapel, nilai] of Object.entries(data.nilai)) {
                 const isAngka = typeof nilai === "number";
                 const persen = isAngka ? Math.min(100, Math.max(0, nilai)) : 0;
-                
-                let colorClass = "bg-brand-500";
-                if (persen >= 85) colorClass = "bg-emerald-500";
-                else if (persen < 70) colorClass = "bg-amber-500";
+                let colorClass = persen >= 85 ? "bg-emerald-500" : (persen < 70 ? "bg-amber-500" : "bg-blue-500");
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -283,7 +289,7 @@
                     <td class="py-3 px-4 text-center font-bold text-white">${nilai}</td>
                     <td class="py-3 px-4 hidden sm:table-cell">
                         <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                            <div class="${colorClass} h-2.5 rounded-full transition-all duration-500" style="width: ${persen}%"></div>
+                            <div class="${colorClass} h-2.5 rounded-full" style="width: ${persen}%"></div>
                         </div>
                     </td>
                 `;
@@ -293,61 +299,6 @@
             document.getElementById("areaHasil").classList.remove("hidden");
         }
 
-        // Function: Kirim Komentar
-        async function kirimKomentar(e) {
-            e.preventDefault();
-            const nama = document.getElementById("komenNama").value.trim();
-            const nis = document.getElementById("komenNis").value.trim();
-            const pesan = document.getElementById("komenPesan").value.trim();
-
-            if (!nama || !pesan) return;
-
-            const btnKomen = document.getElementById("btnKomen");
-            btnKomen.disabled = true;
-            btnKomen.innerText = "Mengirim...";
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ nama, nis, pesan })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    document.getElementById("formKomentar").reset();
-                    muatKomentar();
-                }
-            } catch (err) {
-                console.error("Gagal mengirim komentar", err);
-            } finally {
-                btnKomen.disabled = false;
-                btnKomen.innerHTML = `<i class="fa-solid fa-paper-plane"></i>Kirim Pesan`;
-            }
-        }
-
-        // Function: Load Komentar
-        async function muatKomentar() {
-            const listEl = document.getElementById("listKomentar");
-            try {
-                const response = await fetch(`${API_URL}?action=getKomentar`);
-                const result = await response.json();
-
-                if (result.success && result.data.length > 0) {
-                    listEl.innerHTML = result.data.reverse().map(k => `
-                        <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/40 text-xs">
-                            <span class="font-bold text-brand-400">${escapeHtml(k.nama)}</span>
-                            <p class="text-slate-300 mt-1">${escapeHtml(k.pesan)}</p>
-                        </div>
-                    `).join("");
-                } else {
-                    listEl.innerHTML = `<p class="text-xs text-slate-500 italic">Belum ada pesan terkirim.</p>`;
-                }
-            } catch (err) {
-                listEl.innerHTML = `<p class="text-xs text-slate-500 italic">Gagal memuat pesan.</p>`;
-            }
-        }
-
-        // Helper UI
         function tampilkanLoading(show) {
             document.getElementById("loadingSpinner").classList.toggle("hidden", !show);
         }
@@ -357,24 +308,13 @@
             alertEl.className = `p-4 rounded-xl text-sm font-medium flex items-center gap-3 ${
                 type === 'error' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
             }`;
-            alertEl.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i><span>${msg}</span>`;
+            alertEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${msg}</span>`;
             alertEl.classList.remove("hidden");
         }
 
         function sembunyikanAlert() {
             document.getElementById("pesanAlert").classList.add("hidden");
         }
-
-        function escapeHtml(text) {
-            return text.replace(/[&<>"']/g, function(m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-            });
-        }
-
-        // Init saat halaman selesai dipanggil
-        window.onload = function() {
-            muatKomentar();
-        };
     </script>
 </body>
 </html>
