@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- PapaParse CDN untuk parsing CSV yang andal -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.min.js"></script>
-    
+    <!-- PapaParse CDN untuk parsing CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
     <style>
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
@@ -93,7 +93,9 @@
                     </span>
                     <h2 id="resNama" class="text-2xl sm:text-3xl font-bold text-white">-</h2>
                     <p class="text-slate-400 text-sm mt-1">
-                        NIS: <span id="resNis" class="font-semibold text-slate-200">-</span>
+                        NIS: <span id="resNis" class="font-semibold text-slate-200 mr-4">-</span>
+                        Kelas: <span id="resKelas" class="font-semibold text-slate-200 mr-4">-</span>
+                        Wali Kelas: <span id="resWalas" class="font-semibold text-slate-200">-</span>
                     </p>
                 </div>
                 <button onclick="window.print()" class="no-print bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition flex items-center gap-2">
@@ -136,11 +138,29 @@
     </main>
 
     <script>
-        // URL CSV publik Google Sheet Anda
+        // URL Publikasi CSV Spreadsheet Anda
         const RAW_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1hdumZbRrJpTE4tlFd6n5MWph6rzb8ByCg6h5CZLWuxTG0wctY-HkayFbU4Sp4i3_ZHdrdtdbwQsH/pub?output=csv";
-        
-        // Proxy gratis untuk menghindari kendala CORS
-        const PROXY_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(RAW_CSV_URL)}`;
+
+        async function fetchCSVWithFallback() {
+            // Daftar proxy untuk menghindari masalah CORS
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(RAW_CSV_URL)}`,
+                `https://corsproxy.io/?${encodeURIComponent(RAW_CSV_URL)}`
+            ];
+
+            for (const url of proxies) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const text = await res.text();
+                        if (text && text.length > 50) return text;
+                    }
+                } catch (e) {
+                    console.warn("Proxy mencoba yang lain...", url);
+                }
+            }
+            throw new Error("Gagal mengambil data dari Google Sheets melalui proxy.");
+        }
 
         async function cariNilaiSiswa(e) {
             e.preventDefault();
@@ -156,15 +176,8 @@
             document.getElementById("areaHasil").classList.add("hidden");
 
             try {
-                // Mengambil data CSV menggunakan Proxy AllOrigins
-                const response = await fetch(PROXY_URL);
-                if (!response.ok) {
-                    throw new Error("Gagal mengunduh data CSV.");
-                }
+                const csvText = await fetchCSVWithFallback();
 
-                const csvText = await response.text();
-
-                // Parsing CSV
                 Papa.parse(csvText, {
                     header: false,
                     skipEmptyLines: true,
@@ -181,7 +194,7 @@
             } catch (err) {
                 console.error("Fetch Error:", err);
                 tampilkanLoading(false);
-                tampilkanAlert("Gagal terhubung ke Google Spreadsheet. Pastikan koneksi internet aktif.", "error");
+                tampilkanAlert("Gagal terhubung ke Google Spreadsheet. Pastikan dokumen telah dipublikasikan ke web.", "error");
             }
         }
 
@@ -193,46 +206,54 @@
             }
 
             const headerRow = rows[0];
-            let nisIndex = -1;
-            let namaIndex = -1;
+            
+            // Mencari indeks kolom berdasarkan nama header persis di spreadsheet Anda
+            let nisIdx = -1, namaIdx = -1, kelasIdx = -1, walasIdx = -1;
+            const mapelIndices = [];
 
-            headerRow.forEach((colName, idx) => {
-                const nameUpper = String(colName).toUpperCase().trim();
-                if (nameUpper.includes("NIS")) nisIndex = idx;
-                if (nameUpper.includes("NAMA")) namaIndex = idx;
+            headerRow.forEach((col, idx) => {
+                const title = String(col).trim().toUpperCase();
+                if (title === "NIS") nisIdx = idx;
+                else if (title === "NAMA") namaIdx = idx;
+                else if (title === "KELAS") kelasIdx = idx;
+                else if (title === "WALAS" || title.includes("WALA")) walasIdx = idx;
+                // Mengambil hanya kolom nilai mata pelajaran (Abaikan kolom "TERBILANG")
+                else if (title !== "NO" && !title.includes("TERBILANG")) {
+                    mapelIndices.push({ index: idx, name: String(col).trim() });
+                }
             });
 
-            if (nisIndex === -1) nisIndex = 2; // Default Kolom C
-            if (namaIndex === -1) namaIndex = 1; // Default Kolom B
+            // Default jika tidak terdeteksi otomatis
+            if (nisIdx === -1) nisIdx = 3;  // Kolom D
+            if (namaIdx === -1) namaIdx = 1; // Kolom B
+            if (kelasIdx === -1) kelasIdx = 2; // Kolom C
 
             let dataDitemukan = null;
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
-                const rawNis = row[nisIndex] ? String(row[nisIndex]).trim().replace(/\D/g, "") : "";
+                const rawNis = row[nisIdx] ? String(row[nisIdx]).trim().replace(/\D/g, "") : "";
 
                 if (rawNis === inputNis) {
-                    const nama = row[namaIndex] ? String(row[namaIndex]).trim() : "-";
+                    const nama = row[namaIdx] ? String(row[namaIdx]).trim() : "-";
+                    const kelas = row[kelasIdx] ? String(row[kelasIdx]).trim() : "-";
+                    const walas = (walasIdx !== -1 && row[walasIdx]) ? String(row[walasIdx]).trim() : "-";
+
                     const mapelObj = {};
                     let totalNilai = 0;
                     let jumlahMapel = 0;
 
-                    const startIndex = Math.max(nisIndex, namaIndex) + 1;
-                    for (let j = startIndex; j < headerRow.length; j++) {
-                        const mapelName = headerRow[j] ? String(headerRow[j]).trim() : `Mapel ${j}`;
-                        const valRaw = row[j];
-
+                    mapelIndices.forEach(item => {
+                        const valRaw = row[item.index];
                         if (valRaw !== undefined && valRaw !== null && valRaw !== "") {
                             const valNum = parseFloat(String(valRaw).replace(",", "."));
                             if (!isNaN(valNum)) {
-                                mapelObj[mapelName] = valNum;
+                                mapelObj[item.name] = valNum;
                                 totalNilai += valNum;
                                 jumlahMapel++;
-                            } else {
-                                mapelObj[mapelName] = valRaw;
                             }
                         }
-                    }
+                    });
 
                     const avg = jumlahMapel > 0 ? (totalNilai / jumlahMapel).toFixed(2) : "0";
                     let status = "Sangat Baik";
@@ -242,6 +263,8 @@
                     dataDitemukan = {
                         nis: rawNis,
                         nama: nama,
+                        kelas: kelas,
+                        walas: walas,
                         nilai: mapelObj,
                         total: totalNilai,
                         avg: avg,
@@ -263,6 +286,8 @@
         function renderDataSiswa(data) {
             document.getElementById("resNama").innerText = data.nama;
             document.getElementById("resNis").innerText = data.nis;
+            document.getElementById("resKelas").innerText = data.kelas;
+            document.getElementById("resWalas").innerText = data.walas;
             document.getElementById("resRataRata").innerText = data.avg;
             document.getElementById("resTotal").innerText = data.total;
             document.getElementById("resStatus").innerText = data.status;
@@ -271,8 +296,7 @@
             tbody.innerHTML = "";
 
             for (const [mapel, nilai] of Object.entries(data.nilai)) {
-                const isAngka = typeof nilai === "number";
-                const persen = isAngka ? Math.min(100, Math.max(0, nilai)) : 0;
+                const persen = Math.min(100, Math.max(0, nilai));
                 let colorClass = persen >= 85 ? "bg-emerald-500" : (persen < 70 ? "bg-amber-500" : "bg-blue-500");
 
                 const tr = document.createElement("tr");
